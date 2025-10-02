@@ -5,7 +5,7 @@ import path from 'path'
 const api = {
   selectVideoFile: () => ipcRenderer.invoke('select-video-file'),
 
-  onUpdateProgress: (callback: (event: any, data: any) => void) => {
+  onUpdateProgress: (callback: (event, data) => void) => {
     ipcRenderer.on('update-progress', callback)
   },
 

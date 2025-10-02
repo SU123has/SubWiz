@@ -5,13 +5,17 @@ interface ControlPanelProps {
   onConnectAPI: (url: string) => void
   isAPIConnected: boolean
   isTranslating: boolean
+  subtitleFetched: number
+  totalDuration: number
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
   onSelectVideo,
   onConnectAPI,
   isAPIConnected,
-  isTranslating
+  isTranslating,
+  subtitleFetched,
+  totalDuration
 }) => {
   const [ngrokUrl, setNgrokUrl] = useState('')
 
@@ -41,7 +45,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {isAPIConnected ? 'Connected ✓' : 'Connect to API'}
       </button>
 
-      {isTranslating && <span className="translating-indicator">Translating...</span>}
+      {isTranslating && (
+        <span className="translating-indicator">
+          {Math.floor((subtitleFetched / totalDuration) * 100)}% fetched
+        </span>
+      )}
     </div>
   )
 }

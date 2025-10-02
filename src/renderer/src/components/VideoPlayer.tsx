@@ -1,7 +1,7 @@
 import React from 'react'
 
 interface VideoPlayerProps {
-  videoRef: React.RefObject<HTMLVideoElement>
+  videoRef: React.RefObject<HTMLVideoElement | null>
   isLoaded: boolean
   error: string | null
 }

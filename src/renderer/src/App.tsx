@@ -12,17 +12,16 @@ interface Subtitle {
   text: string
 }
 
-function App(): JSX.Element {
+function App(): React.ReactElement {
   const [currentVideoPath, setCurrentVideoPath] = useState<string>('')
   const [subtitles, setSubtitles] = useState<Subtitle[]>([])
   const [status, setStatus] = useState<string>('Ready - Select a video to begin')
-  const processedChunks = new Set<number>()
+  const [subtitleFetched, setSubtitleFetched] = useState(0)
   const [nextChunkStart, setNextChunkStart] = useState(0)
   const [isProcessingChunk, setIsProcessingChunk] = useState(false)
 
   const videoPlayer = useVideoPlayer()
   const whisperAPI = useWhisperAPI()
-  console.log('subtitles', subtitles)
 
   // Handle file selection
   const handleSelectVideo = useCallback(async () => {
@@ -32,6 +31,7 @@ function App(): JSX.Element {
       videoPlayer.loadVideo(`file://${filePath}`)
       setStatus(`Loaded: ${window.api.path.basename(filePath)}`)
       setNextChunkStart(0)
+      setSubtitleFetched(0)
       setIsProcessingChunk(false)
       // Clear previous subtitles
       setSubtitles([])
@@ -54,7 +54,6 @@ function App(): JSX.Element {
   const processChunk = useCallback(async () => {
     if (!currentVideoPath || !whisperAPI.isConnected || isProcessingChunk) return
     if (nextChunkStart >= videoPlayer.duration) {
-      console.log('Reached video end, stopping chunk processing.')
       return
     }
 
@@ -73,7 +72,7 @@ function App(): JSX.Element {
             text: seg.text
           }))
         ])
-
+        setSubtitleFetched(nextChunkStart)
         setNextChunkStart((prev) => prev + 20) // advance to next chunk
       } else {
         console.error('Translation failed:', result.error)
@@ -83,7 +82,7 @@ function App(): JSX.Element {
     } finally {
       setIsProcessingChunk(false)
     }
-  }, [currentVideoPath, whisperAPI, nextChunkStart, isProcessingChunk])
+  }, [currentVideoPath, whisperAPI, nextChunkStart, isProcessingChunk, videoPlayer.duration])
 
   // Real-time subtitle processing
   useEffect(() => {
@@ -106,6 +105,8 @@ function App(): JSX.Element {
           onConnectAPI={handleConnectAPI}
           isAPIConnected={whisperAPI.isConnected}
           isTranslating={whisperAPI.isTranslating}
+          subtitleFetched={subtitleFetched}
+          totalDuration={videoPlayer.duration}
         />
       </header>
 

@@ -41,7 +41,6 @@ export const useWhisperAPI = (): UseWhisperAPIReturn => {
 
   const connect = useCallback(async (url: string): Promise<boolean> => {
     const cleanUrl = url.endsWith('/') ? url.slice(0, -1) : url
-    console.log('Health URL:', `${cleanUrl}/health`)
     setNgrokUrl(cleanUrl)
 
     try {
@@ -50,10 +49,8 @@ export const useWhisperAPI = (): UseWhisperAPIReturn => {
           'ngrok-skip-browser-warning': '1' // arbitrary value
         }
       })
-      console.log('Status:', response.status, response.statusText)
 
       const text = await response.text()
-      console.log('Raw response body:', text)
 
       // Only parse JSON if status is OK
       if (!response.ok) {
@@ -63,7 +60,7 @@ export const useWhisperAPI = (): UseWhisperAPIReturn => {
       }
 
       // Attempt JSON parse
-      let data: any
+      let data
       try {
         data = JSON.parse(text)
       } catch (err) {
