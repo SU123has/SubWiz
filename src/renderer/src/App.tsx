@@ -96,6 +96,35 @@ function App(): React.ReactElement {
     (sub) => videoPlayer.currentTime >= sub.start && videoPlayer.currentTime <= sub.end
   )
 
+  const formatTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = Math.floor(seconds % 60)
+    const milliseconds = Math.floor((seconds % 1) * 1000)
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`
+  }
+
+  const handleExportToSRT = useCallback(() => {
+    const srtContent = subtitles
+      .map((sub, index) => {
+        const start = formatTime(sub.start)
+        const end = formatTime(sub.end)
+        return `${index + 1}\n${start} --> ${end}\n${sub.text}\n`
+      })
+      .join('\n')
+
+    const blob = new Blob([srtContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const filename = currentVideoPath.split(/[/\\]/).pop() || 'video'
+    // Remove file extension for cleaner SRT filename
+    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '')
+    a.download = `${nameWithoutExt}_subtitles.srt`
+    a.click()
+  }, [subtitles, currentVideoPath])
+
   return (
     <div className="app">
       <header className="app-header">
@@ -107,6 +136,9 @@ function App(): React.ReactElement {
           isTranslating={whisperAPI.isTranslating}
           subtitleFetched={subtitleFetched}
           totalDuration={videoPlayer.duration}
+          exportToSRT={handleExportToSRT}
+          currentVideoPath={currentVideoPath}
+          isConnected={whisperAPI.isConnected}
         />
       </header>
 

@@ -7,6 +7,9 @@ interface ControlPanelProps {
   isTranslating: boolean
   subtitleFetched: number
   totalDuration: number
+  exportToSRT: () => void
+  currentVideoPath: string
+  isConnected: boolean
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -15,7 +18,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isAPIConnected,
   isTranslating,
   subtitleFetched,
-  totalDuration
+  totalDuration,
+  exportToSRT,
+  currentVideoPath,
+  isConnected
 }) => {
   const [ngrokUrl, setNgrokUrl] = useState('')
 
@@ -24,6 +30,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       onConnectAPI(ngrokUrl.trim())
     }
   }
+  console.log(currentVideoPath, subtitleFetched, totalDuration)
 
   return (
     <div className="control-panel">
@@ -49,6 +56,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <span className="translating-indicator">
           {Math.floor((subtitleFetched / totalDuration) * 100)}% fetched
         </span>
+      )}
+      {currentVideoPath && isConnected && !isTranslating && (
+        <button onClick={exportToSRT}>Download SRT file</button>
       )}
     </div>
   )
